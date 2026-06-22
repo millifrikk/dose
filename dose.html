@@ -14,7 +14,7 @@
 :root{
   --bg:#0e1f1d; --bg2:#0a1817; --surface:#16302c; --surface2:#1d3a35;
   --line:#274b44; --text:#e9f4ef; --muted:#85aaa0;
-  --mint:#6fe3b0; --amber:#f3cf72; --coral:#ff8f7c;
+  --mint:#6fe3b0; --amber:#f3cf72; --coral:#ff8f7c; --sky:#5fc6e0;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0}
@@ -25,20 +25,49 @@ body{margin:0}
   display:flex;justify-content:center;
   padding:calc(28px + env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom));
 }
-.mt-wrap{width:100%;max-width:430px;display:flex;flex-direction:column;gap:22px}
-.mt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mt-wrap{width:100%;max-width:430px;display:flex;flex-direction:column;gap:20px}
 .mt-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;
   text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.mt-h1{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:27px;
+  margin:0;line-height:1.1;letter-spacing:-.01em;cursor:pointer}
+.mt-h1-input{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:27px;
+  background:transparent;border:none;border-bottom:1px dashed var(--line);color:var(--text);
+  padding:2px 0;width:100%;outline:none}
+.mt-h1-input:focus{border-bottom-color:var(--mint)}
 .mt-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;
   margin:0;line-height:1.1;letter-spacing:-.01em;cursor:pointer}
 .mt-name-input{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;
   background:transparent;border:none;border-bottom:1px dashed var(--line);color:var(--text);
   padding:2px 0;width:100%;outline:none}
 .mt-name-input:focus{border-bottom-color:var(--mint)}
+.mt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .mt-gear{flex:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--line);
   background:var(--surface);color:var(--muted);cursor:pointer;display:grid;place-items:center;
   font-size:18px;transition:.15s}
 .mt-gear:hover{color:var(--text);border-color:var(--mint)}
+.mt-back{display:inline-flex;align-items:center;gap:8px;background:none;border:none;color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;font-size:13px;cursor:pointer;padding:0;align-self:flex-start}
+.mt-back:hover{color:var(--mint)}
+
+.med-list{display:flex;flex-direction:column;gap:12px}
+.med-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:18px;padding:16px;cursor:pointer;transition:.12s}
+.med-card:hover{border-color:var(--mint)}
+.med-dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--muted)}
+.med-main{flex:1;min-width:0}
+.med-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.med-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.med-right{text-align:right;flex:none}
+.med-next{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;font-variant-numeric:tabular-nums;line-height:1}
+.med-nextx{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px}
+.med-nextx.go{color:var(--mint)}
+.med-empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 10px;line-height:1.5;
+  background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.mt-addbtn{width:100%;border:1px dashed var(--line);background:transparent;color:var(--mint);
+  border-radius:16px;padding:15px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:.12s}
+.mt-addbtn:hover{border-color:var(--mint)}
+
 .mt-dial{position:relative;display:grid;place-items:center;padding:8px 0 2px}
 .mt-ring{transform:rotate(-90deg)}
 .mt-track{fill:none;stroke:var(--surface2);stroke-width:14}
@@ -104,6 +133,9 @@ body{margin:0}
 .mt-ghost{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
   border-radius:13px;padding:11px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;transition:.12s}
 .mt-ghost:hover{color:var(--text);border-color:var(--coral)}
+.mt-del{width:100%;border:1px solid var(--line);background:transparent;color:var(--coral);
+  border-radius:13px;padding:12px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;transition:.12s}
+.mt-del:hover{border-color:var(--coral);background:rgba(255,143,124,.08)}
 .mt-foot{text-align:center;font-size:11px;color:var(--muted);line-height:1.5;padding:0 6px;margin:0}
 </style>
 </head>
@@ -132,10 +164,23 @@ body{margin:0}
 const KEY="medtimer:v1";
 const PRESETS=[4,6,8,12,24];
 const R=110, C=2*Math.PI*R;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
-let state={name:"",intervalHours:null,doses:[]};
-try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+let data={headline:"My medications",meds:[]};
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw){
+    const p=JSON.parse(raw);
+    if(p && p.meds){ data=Object.assign(data,p); }
+    else if(p && (Array.isArray(p.doses)||p.name||p.intervalHours!==undefined)){
+      data={headline:"My medications",meds:[
+        {id:uid(),name:p.name||"",intervalHours:(p.intervalHours==null?null:p.intervalHours),doses:p.doses||[]}
+      ]};
+      localStorage.setItem(KEY,JSON.stringify(data));
+    }
+  }
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}
 
 const pad=n=>String(n).padStart(2,"0");
 const clock=ts=>{const d=new Date(ts);return pad(d.getHours())+":"+pad(d.getMinutes());};
@@ -151,83 +196,241 @@ function nowLocalInput(){
   return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 
-wrap.innerHTML=`
-  <div class="mt-top">
-    <div style="flex:1;min-width:0">
-      <p class="mt-eyebrow">Dose timer</p>
-      <h1 class="mt-name" id="nameLabel"></h1>
-      <input class="mt-name-input" id="nameInput" placeholder="Name your medicine" style="display:none"/>
-    </div>
-    <button class="mt-gear" id="gear" aria-label="Settings">⚙</button>
-  </div>
-  <div class="mt-dial" id="dial">
-    <svg class="mt-ring" width="260" height="260" viewBox="0 0 260 260">
-      <circle class="mt-track" cx="130" cy="130" r="110"/>
-      <circle class="mt-prog" id="prog" cx="130" cy="130" r="110" stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
-    </svg>
-    <div class="mt-center">
-      <span class="mt-status" id="status"></span>
-      <span class="mt-big" id="big"></span>
-      <span class="mt-sub" id="sub"></span>
-    </div>
-  </div>
-  <div class="mt-stats">
-    <div class="mt-stat">
-      <span class="k">Time since dose</span>
-      <span class="v" id="sinceV">—</span>
-      <span class="x" id="sinceX">none yet</span>
-    </div>
-    <div class="mt-stat" id="nextCard">
-      <span class="k">Next dose</span>
-      <span class="v" id="nextV">—</span>
-      <span class="x" id="nextX"></span>
-    </div>
-  </div>
-  <button class="mt-btn" id="logBtn">I took it</button>
-  <div class="mt-toast" id="toast">&nbsp;</div>
-  <button class="mt-link" id="addLink">Forgot to tap? Add a dose at a past time</button>
-  <div class="mt-addpanel" id="addPanel" style="display:none">
-    <input class="mt-dt" id="dt" type="datetime-local"/>
-    <button class="mt-add" id="addBtn">Add</button>
-  </div>
-  <div class="mt-card" id="settings" style="display:none">
-    <h2>Minimum spacing between doses</h2>
-    <div class="mt-presets" id="presets"></div>
-    <div class="mt-field">
-      <label>Custom</label>
-      <input class="mt-num" id="customH" type="number" min="0" step="0.5" placeholder="hrs"/>
-      <label>hours</label>
-    </div>
-  </div>
-  <div class="mt-card">
-    <h2>Recent doses</h2>
-    <div id="histArea"></div>
-  </div>
-  <div class="mt-row" id="actions" style="display:none">
-    <button class="mt-ghost" id="undoBtn">Undo last</button>
-    <button class="mt-ghost" id="clearBtn">Clear history</button>
-  </div>
-  <p class="mt-foot">A personal timer stored on this device. Not medical advice — follow your prescription and your doctor’s guidance.</p>
-`;
-
+let view="home", currentId=null;
+const med=()=>data.meds.find(m=>m.id===currentId);
 const $=id=>document.getElementById(id);
+const wrap=$("wrap");
 let toastTimer=null;
-function toast(msg){const t=$("toast");t.textContent=msg;t.style.opacity=1;
+function toast(msg){const t=$("toast");if(!t)return;t.textContent=msg;t.style.opacity=1;
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.style.opacity=0;},2600);}
 
-function computed(){
-  const doses=[...state.doses].sort((a,b)=>a-b);
+function statusOf(m){
+  const doses=[...(m.doses||[])].sort((a,b)=>a-b);
   const last=doses.length?doses[doses.length-1]:null;
   const now=Date.now();
   const elapsed=last?now-last:0;
-  const intMs=state.intervalHours?state.intervalHours*3600000:null;
+  const intMs=m.intervalHours?m.intervalHours*3600000:null;
   const ready=intMs?elapsed>=intMs:false;
   const remaining=intMs?Math.max(0,intMs-elapsed):0;
   return {doses,last,elapsed,intMs,ready,remaining};
 }
 
+/* ================= HOME ================= */
+function renderHome(){
+  view="home";currentId=null;
+  wrap.innerHTML="";
+  const head=document.createElement("div");
+  head.innerHTML='<p class="mt-eyebrow">Dose timer</p>'+
+    '<h1 class="mt-h1" id="headline"></h1>'+
+    '<input class="mt-h1-input" id="headlineInput" placeholder="Headline" style="display:none"/>';
+  wrap.appendChild(head);
+  $("headline").textContent=data.headline||"My medications";
+  $("headline").onclick=()=>{const l=$("headline"),i=$("headlineInput");
+    i.value=data.headline||"";l.style.display="none";i.style.display="block";i.focus();};
+  $("headlineInput").onblur=commitHeadline;
+  $("headlineInput").onkeydown=e=>{if(e.key==="Enter")commitHeadline();};
+
+  const list=document.createElement("div");list.className="med-list";list.id="medList";
+  wrap.appendChild(list);
+
+  const addBtn=document.createElement("button");
+  addBtn.className="mt-addbtn";addBtn.id="addMedBtn";addBtn.textContent="+ Add medicine";
+  wrap.appendChild(addBtn);
+  const addPanel=document.createElement("div");
+  addPanel.className="mt-addpanel";addPanel.id="addMedPanel";addPanel.style.display="none";
+  addPanel.innerHTML='<input class="mt-dt" id="newMedName" placeholder="Medicine name"/>'+
+    '<button class="mt-add" id="newMedAdd">Add</button>';
+  wrap.appendChild(addPanel);
+
+  addBtn.onclick=()=>{const p=$("addMedPanel"),open=p.style.display==="none";
+    p.style.display=open?"flex":"none";if(open)$("newMedName").focus();};
+  $("newMedAdd").onclick=addMed;
+  $("newMedName").onkeydown=e=>{if(e.key==="Enter")addMed();};
+
+  const foot=document.createElement("p");foot.className="mt-foot";
+  foot.textContent="A personal timer stored on this device. Not medical advice — follow your prescription and your doctor's guidance.";
+  wrap.appendChild(foot);
+
+  renderMedCards();
+}
+function commitHeadline(){const i=$("headlineInput");if(!i)return;
+  data.headline=i.value.trim()||"My medications";save();
+  i.style.display="none";const l=$("headline");l.style.display="block";l.textContent=data.headline;}
+
+function addMed(){
+  const i=$("newMedName");const name=(i.value||"").trim();
+  const m={id:uid(),name:name,intervalHours:null,doses:[]};
+  data.meds.push(m);save();openMed(m.id);
+}
+
+function renderMedCards(){
+  const list=$("medList");if(!list)return;list.innerHTML="";
+  if(!data.meds.length){
+    const e=document.createElement("div");e.className="med-empty";
+    e.innerHTML="No medicines yet.<br>Add one below to start tracking.";
+    list.appendChild(e);return;
+  }
+  data.meds.forEach(m=>{
+    const card=document.createElement("div");card.className="med-card";card.dataset.id=m.id;
+    const dot=document.createElement("span");dot.className="med-dot";
+    const main=document.createElement("div");main.className="med-main";
+    const nm=document.createElement("div");nm.className="med-name";
+    nm.textContent=m.name||"Untitled medicine";
+    const sub=document.createElement("div");sub.className="med-sub";
+    main.appendChild(nm);main.appendChild(sub);
+    const right=document.createElement("div");right.className="med-right";
+    const nx=document.createElement("div");nx.className="med-next";
+    const nxx=document.createElement("div");nxx.className="med-nextx";
+    right.appendChild(nx);right.appendChild(nxx);
+    card.appendChild(dot);card.appendChild(main);card.appendChild(right);
+    card.onclick=()=>openMed(m.id);
+    list.appendChild(card);
+  });
+  refreshHomeLive();
+}
+
+function refreshHomeLive(){
+  const cards=document.querySelectorAll(".med-card");
+  cards.forEach(card=>{
+    const m=data.meds.find(x=>x.id===card.dataset.id);if(!m)return;
+    const {last,elapsed,intMs,ready,remaining}=statusOf(m);
+    const dot=card.querySelector(".med-dot");
+    const sub=card.querySelector(".med-sub");
+    const nx=card.querySelector(".med-next");
+    const nxx=card.querySelector(".med-nextx");
+    if(!last){
+      dot.style.background="var(--muted)";
+      sub.textContent="No doses logged yet";
+      nx.textContent="—";nxx.textContent="";nxx.classList.remove("go");
+    }else{
+      sub.textContent="Taken "+clock(last)+" · "+dur(elapsed)+" ago";
+      if(intMs){
+        dot.style.background=ready?"var(--mint)":"var(--amber)";
+        nx.textContent=clock(last+intMs);
+        nxx.textContent=ready?"ready now":"in "+dur(remaining);
+        nxx.classList.toggle("go",ready);
+      }else{
+        dot.style.background="var(--sky)";
+        nx.textContent=dur(elapsed);
+        nxx.textContent="since dose";nxx.classList.remove("go");
+      }
+    }
+  });
+}
+
+/* ================= DETAIL ================= */
+function openMed(id){currentId=id;renderDetail();}
+
+function renderDetail(){
+  view="detail";
+  const m=med();if(!m){renderHome();return;}
+  wrap.innerHTML=`
+    <button class="mt-back" id="back">← All medicines</button>
+    <div class="mt-top">
+      <div style="flex:1;min-width:0">
+        <p class="mt-eyebrow">Dose timer</p>
+        <h1 class="mt-name" id="nameLabel"></h1>
+        <input class="mt-name-input" id="nameInput" placeholder="Name this medicine" style="display:none"/>
+      </div>
+      <button class="mt-gear" id="gear" aria-label="Settings">⚙</button>
+    </div>
+    <div class="mt-dial" id="dial">
+      <svg class="mt-ring" width="260" height="260" viewBox="0 0 260 260">
+        <circle class="mt-track" cx="130" cy="130" r="110"/>
+        <circle class="mt-prog" id="prog" cx="130" cy="130" r="110" stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
+      </svg>
+      <div class="mt-center">
+        <span class="mt-status" id="status"></span>
+        <span class="mt-big" id="big"></span>
+        <span class="mt-sub" id="sub"></span>
+      </div>
+    </div>
+    <div class="mt-stats">
+      <div class="mt-stat">
+        <span class="k">Time since dose</span>
+        <span class="v" id="sinceV">—</span>
+        <span class="x" id="sinceX">none yet</span>
+      </div>
+      <div class="mt-stat" id="nextCard">
+        <span class="k">Next dose</span>
+        <span class="v" id="nextV">—</span>
+        <span class="x" id="nextX"></span>
+      </div>
+    </div>
+    <button class="mt-btn" id="logBtn">I took it</button>
+    <div class="mt-toast" id="toast">&nbsp;</div>
+    <button class="mt-link" id="addLink">Forgot to tap? Add a dose at a past time</button>
+    <div class="mt-addpanel" id="addPanel" style="display:none">
+      <input class="mt-dt" id="dt" type="datetime-local"/>
+      <button class="mt-add" id="addBtn">Add</button>
+    </div>
+    <div class="mt-card" id="settings" style="display:none">
+      <h2>Minimum spacing between doses</h2>
+      <div class="mt-presets" id="presets"></div>
+      <div class="mt-field">
+        <label>Custom</label>
+        <input class="mt-num" id="customH" type="number" min="0" step="0.5" placeholder="hrs"/>
+        <label>hours</label>
+      </div>
+    </div>
+    <div class="mt-card">
+      <h2>Recent doses</h2>
+      <div id="histArea"></div>
+    </div>
+    <div class="mt-row" id="actions" style="display:none">
+      <button class="mt-ghost" id="undoBtn">Undo last</button>
+      <button class="mt-ghost" id="clearBtn">Clear history</button>
+    </div>
+    <button class="mt-del" id="deleteMed">Delete this medicine</button>
+    <p class="mt-foot">A personal timer stored on this device. Not medical advice — follow your prescription and your doctor's guidance.</p>
+  `;
+
+  $("back").onclick=renderHome;
+  $("gear").onclick=()=>{const s=$("settings");s.style.display=s.style.display==="none"?"block":"none";};
+  $("nameLabel").onclick=()=>{const l=$("nameLabel"),i=$("nameInput");
+    i.value=m.name;l.style.display="none";i.style.display="block";i.focus();};
+  $("nameInput").onblur=commitName;
+  $("nameInput").onkeydown=e=>{if(e.key==="Enter")commitName();};
+  $("logBtn").onclick=()=>{const t=Date.now();m.doses.push(t);save();detailRefresh();toast("Logged at "+clock(t));};
+  $("undoBtn").onclick=()=>{m.doses.sort((a,b)=>a-b);m.doses.pop();save();detailRefresh();toast("Last dose removed");};
+  $("clearBtn").onclick=()=>{if(confirm("Clear all dose history for this medicine?")){m.doses=[];save();detailRefresh();}};
+  $("nextCard").onclick=()=>{if(!m.intervalHours)$("settings").style.display="block";};
+  $("addLink").onclick=()=>{
+    const p=$("addPanel"),open=p.style.display==="none";
+    p.style.display=open?"flex":"none";
+    $("addLink").textContent=open?"Cancel":"Forgot to tap? Add a dose at a past time";
+    if(open){$("dt").value=nowLocalInput();$("dt").max=nowLocalInput();}
+  };
+  $("addBtn").onclick=()=>{
+    const v=$("dt").value;
+    if(!v){toast("Pick a time first");return;}
+    const t=new Date(v).getTime();
+    if(isNaN(t)){toast("Invalid time");return;}
+    if(t>Date.now()){toast("Pick a time in the past");return;}
+    m.doses.push(t);save();detailRefresh();
+    $("addPanel").style.display="none";
+    $("addLink").textContent="Forgot to tap? Add a dose at a past time";
+    toast("Added dose · "+clock(t));
+  };
+  $("customH").oninput=e=>{const x=parseFloat(e.target.value);
+    m.intervalHours=isNaN(x)||x<=0?null:x;save();renderPresets();updateLive();};
+  $("deleteMed").onclick=()=>{
+    if(confirm("Delete \""+(m.name||"this medicine")+"\" and all its history?")){
+      data.meds=data.meds.filter(x=>x.id!==m.id);save();renderHome();
+    }
+  };
+
+  detailRefresh();
+}
+
+function commitName(){const m=med();const i=$("nameInput");if(!m||!i)return;
+  m.name=i.value.trim();save();
+  i.style.display="none";const l=$("nameLabel");l.style.display="block";
+  l.textContent=m.name||"My medicine";}
+
 function updateLive(){
-  const {last,elapsed,intMs,ready,remaining}=computed();
+  const m=med();if(!m)return;
+  const {last,elapsed,intMs,ready,remaining}=statusOf(m);
   $("logBtn").textContent=last?"I took another dose":"I took it";
   let statusLabel="Time since dose",statusColor="var(--muted)",big="—",sub="No dose logged yet";
   if(last){
@@ -241,7 +444,7 @@ function updateLive(){
   const prog=$("prog");
   if(intMs){
     const p=Math.min(1,elapsed/intMs);
-    prog.style.stroke=ready?"var(--mint)":(p>0.7?"var(--amber)":"#5fc6e0");
+    prog.style.stroke=ready?"var(--mint)":(p>0.7?"var(--amber)":"var(--sky)");
     prog.setAttribute("stroke-dashoffset",C*(1-p));
   }else{prog.setAttribute("stroke-dashoffset",C);}
   $("sinceV").textContent=last?clock(last):"—";
@@ -261,11 +464,12 @@ function updateLive(){
 }
 
 function renderHistory(){
-  const {doses}=computed();
+  const m=med();if(!m)return;
+  const doses=[...m.doses].sort((a,b)=>a-b);
   $("actions").style.display=doses.length?"flex":"none";
   const area=$("histArea");
   if(!doses.length){
-    area.innerHTML='<p class="mt-empty">Nothing logged yet.<br>Tap “I took it” when you take your medicine.</p>';
+    area.innerHTML='<p class="mt-empty">Nothing logged yet.<br>Tap "I took it" when you take this medicine.</p>';
     return;
   }
   const rev=[...doses].reverse().slice(0,8);
@@ -278,65 +482,37 @@ function renderHistory(){
     html+='<li><span class="mt-htime">'+date+' · '+clock(t)+
       '</span><span class="mt-hgap">'+(prev?"+"+dur(t-prev):"first")+'</span></li>';
   });
-  html+='</ul>';
-  area.innerHTML=html;
+  html+='</ul>';area.innerHTML=html;
 }
 
 function renderPresets(){
+  const m=med();if(!m)return;
   const box=$("presets");box.innerHTML="";
   PRESETS.forEach(h=>{
     const b=document.createElement("button");
-    b.className="mt-chip"+(state.intervalHours===h?" on":"");
+    b.className="mt-chip"+(m.intervalHours===h?" on":"");
     b.textContent=h+"h";
-    b.onclick=()=>{state.intervalHours=state.intervalHours===h?null:h;save();renderPresets();syncCustom();updateLive();};
+    b.onclick=()=>{m.intervalHours=m.intervalHours===h?null:h;save();renderPresets();syncCustom();updateLive();};
     box.appendChild(b);
   });
   const off=document.createElement("button");
-  off.className="mt-chip"+(state.intervalHours===null?" on":"");
+  off.className="mt-chip"+(m.intervalHours==null?" on":"");
   off.textContent="Off";
-  off.onclick=()=>{state.intervalHours=null;save();renderPresets();syncCustom();updateLive();};
+  off.onclick=()=>{m.intervalHours=null;save();renderPresets();syncCustom();updateLive();};
   box.appendChild(off);
 }
-function syncCustom(){const c=$("customH");if(document.activeElement!==c)c.value=state.intervalHours??"";}
+function syncCustom(){const m=med();const c=$("customH");if(!c||!m)return;
+  if(document.activeElement!==c)c.value=(m.intervalHours==null?"":m.intervalHours);}
 
-function refresh(){
-  $("nameLabel").textContent=state.name||"My medicine";
+function detailRefresh(){
+  const m=med();if(!m)return;
+  $("nameLabel").textContent=m.name||"My medicine";
   updateLive();renderHistory();renderPresets();syncCustom();
 }
 
-$("gear").onclick=()=>{const s=$("settings");s.style.display=s.style.display==="none"?"block":"none";};
-$("nameLabel").onclick=()=>{const l=$("nameLabel"),i=$("nameInput");
-  i.value=state.name;l.style.display="none";i.style.display="block";i.focus();};
-function commitName(){const i=$("nameInput");state.name=i.value.trim();save();
-  i.style.display="none";$("nameLabel").style.display="block";refresh();}
-$("nameInput").onblur=commitName;
-$("nameInput").onkeydown=e=>{if(e.key==="Enter")commitName();};
-$("logBtn").onclick=()=>{const t=Date.now();state.doses.push(t);save();refresh();toast("Logged at "+clock(t));};
-$("undoBtn").onclick=()=>{state.doses.sort((a,b)=>a-b);state.doses.pop();save();refresh();toast("Last dose removed");};
-$("clearBtn").onclick=()=>{if(confirm("Clear all dose history?")){state.doses=[];save();refresh();}};
-$("nextCard").onclick=()=>{if(!state.intervalHours)$("settings").style.display="block";};
-$("addLink").onclick=()=>{
-  const p=$("addPanel"),open=p.style.display==="none";
-  p.style.display=open?"flex":"none";
-  $("addLink").textContent=open?"Cancel":"Forgot to tap? Add a dose at a past time";
-  if(open){$("dt").value=nowLocalInput();$("dt").max=nowLocalInput();}
-};
-$("addBtn").onclick=()=>{
-  const v=$("dt").value;
-  if(!v){toast("Pick a time first");return;}
-  const t=new Date(v).getTime();
-  if(isNaN(t)){toast("Invalid time");return;}
-  if(t>Date.now()){toast("Pick a time in the past");return;}
-  state.doses.push(t);save();refresh();
-  $("addPanel").style.display="none";
-  $("addLink").textContent="Forgot to tap? Add a dose at a past time";
-  toast("Added dose · "+clock(t));
-};
-$("customH").oninput=e=>{const x=parseFloat(e.target.value);
-  state.intervalHours=isNaN(x)||x<=0?null:x;save();renderPresets();updateLive();};
-
-refresh();
-setInterval(updateLive,1000);
+/* ================= BOOT ================= */
+renderHome();
+setInterval(()=>{ if(view==="home")refreshHomeLive(); else updateLive(); },1000);
 </script>
 </body>
 </html>
