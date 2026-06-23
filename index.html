@@ -364,8 +364,8 @@ function renderDetail(){
       <input class="mt-dt" id="dt" type="datetime-local"/>
       <button class="mt-add" id="addBtn">Add</button>
     </div>
-    <div class="mt-card" id="settings" style="display:none">
-      <h2>Minimum spacing between doses</h2>
+    <div class="mt-card" id="settings">
+      <h2>Minimum spacing between doses · change anytime</h2>
       <div class="mt-presets" id="presets"></div>
       <div class="mt-field">
         <label>Custom</label>
@@ -492,13 +492,13 @@ function renderPresets(){
     const b=document.createElement("button");
     b.className="mt-chip"+(m.intervalHours===h?" on":"");
     b.textContent=h+"h";
-    b.onclick=()=>{m.intervalHours=m.intervalHours===h?null:h;save();renderPresets();syncCustom();updateLive();};
+    b.onclick=()=>{m.intervalHours=m.intervalHours===h?null:h;save();renderPresets();syncCustom();updateLive();toast(m.intervalHours?("Spacing set to "+m.intervalHours+"h · countdown updated"):"Spacing turned off");};
     box.appendChild(b);
   });
   const off=document.createElement("button");
   off.className="mt-chip"+(m.intervalHours==null?" on":"");
   off.textContent="Off";
-  off.onclick=()=>{m.intervalHours=null;save();renderPresets();syncCustom();updateLive();};
+  off.onclick=()=>{m.intervalHours=null;save();renderPresets();syncCustom();updateLive();toast("Spacing turned off");};
   box.appendChild(off);
 }
 function syncCustom(){const m=med();const c=$("customH");if(!c||!m)return;
